@@ -14,16 +14,14 @@ movie_router = APIRouter()
 db = session()
 movie_service = MovieService(db)
 
-  
-# , dependencies=[Depends(JWTBearer())]
-@movie_router.get('/movies', tags=["Movies"], response_model=List[Movie], status_code=200)
+@movie_router.get('/movies', tags=["Movies"], response_model=List[Movie], status_code=200, dependencies=[Depends(JWTBearer())])
 def get_movies() -> List[Movie]:
     movies = movie_service.get_movies()
     db.close()
     return JSONResponse(status_code=200, content=jsonable_encoder(movies))
 
 
-@movie_router.get('/movies/{id}', tags=["Movies"], response_model=Movie)
+@movie_router.get('/movies/{id}', tags=["Movies"], response_model=Movie, dependencies=[Depends(JWTBearer())])
 def get_movie(id: int = Path(ge=1, le=2000)) -> Movie:
     movie = movie_service.get_movie(id)
     db.close()
@@ -32,7 +30,7 @@ def get_movie(id: int = Path(ge=1, le=2000)) -> Movie:
     return JSONResponse(status_code=200, content=jsonable_encoder(movie))
 
 
-@movie_router.get('/movies/', tags=["Movies"], response_model=List[Movie])
+@movie_router.get('/movies/', tags=["Movies"], response_model=List[Movie], dependencies=[Depends(JWTBearer())])
 def get_movies_by_category(category: str = Query(min_length=5, max_length=100)) -> List[Movie]:
     movies = movie_service.get_movies_by_category(category)
     db.close()
@@ -41,7 +39,7 @@ def get_movies_by_category(category: str = Query(min_length=5, max_length=100)) 
     return JSONResponse(status_code=200, content=jsonable_encoder(movies))
 
 
-@movie_router.post('/movies', tags=["Movies"], response_model=dict, status_code=201)
+@movie_router.post('/movies', tags=["Movies"], response_model=dict, status_code=201, dependencies=[Depends(JWTBearer())])
 def create_movie(movie: Movie) -> dict:
     movie_service.create_movie(movie)
     db.close()
@@ -52,7 +50,7 @@ def create_movie(movie: Movie) -> dict:
     return JSONResponse(status_code=201, content=response)
 
 
-@movie_router.put('/movies/{id}', tags=["Movies"], response_model=dict, status_code=200)
+@movie_router.put('/movies/{id}', tags=["Movies"], response_model=dict, status_code=200, dependencies=[Depends(JWTBearer())])
 def update_movie(id: int, movie: Movie) -> dict:
 
     result = movie_service.update_movie(id, movie)
@@ -67,7 +65,7 @@ def update_movie(id: int, movie: Movie) -> dict:
     return JSONResponse(status_code=201, content=response)
 
 
-@movie_router.delete('/movies/{id}', tags=["Movies"], response_model=dict, status_code=200)
+@movie_router.delete('/movies/{id}', tags=["Movies"], response_model=dict, status_code=200, dependencies=[Depends(JWTBearer())])
 def delete_movie(id: int) -> dict:
     
     result = movie_service.delete_movie(id)
