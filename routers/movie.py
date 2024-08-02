@@ -8,38 +8,38 @@ from Models.movie import Movie as MovieModel
 from fastapi.encoders import jsonable_encoder
 from middlewares.jwt_bearer import JWTBearer
 from services.movie import MovieService
-from schemas.movie import Movie
+from schemas.movie import Movie, GetMovie, GetMovieByCategory
 
 movie_router = APIRouter()
 db = session()
 movie_service = MovieService(db)
 
-@movie_router.get('/movies', tags=["Movies"], response_model=List[Movie], status_code=200, dependencies=[Depends(JWTBearer())])
+@movie_router.post('/movies/get_movies', tags=["Movies"], response_model=List[Movie], status_code=200, dependencies=[Depends(JWTBearer())])
 def get_movies() -> List[Movie]:
     movies = movie_service.get_movies()
     db.close()
     return JSONResponse(status_code=200, content=jsonable_encoder(movies))
 
 
-@movie_router.get('/movies/{id}', tags=["Movies"], response_model=Movie, dependencies=[Depends(JWTBearer())])
-def get_movie(id: int = Path(ge=1, le=2000)) -> Movie:
-    movie = movie_service.get_movie(id)
+@movie_router.post('/movies/get_movie', tags=["Movies"], response_model=Movie, dependencies=[Depends(JWTBearer())])
+def get_movie(getMovie: GetMovie):
+    movie = movie_service.get_movie(getMovie.id)
     db.close()
     if not movie:
         return JSONResponse(status_code= 404, content=["No encontrado"])
     return JSONResponse(status_code=200, content=jsonable_encoder(movie))
 
 
-@movie_router.get('/movies/', tags=["Movies"], response_model=List[Movie], dependencies=[Depends(JWTBearer())])
-def get_movies_by_category(category: str = Query(min_length=5, max_length=100)) -> List[Movie]:
-    movies = movie_service.get_movies_by_category(category)
+@movie_router.post('/movies/get_movies_by_category', tags=["Movies"], response_model=List[Movie], dependencies=[Depends(JWTBearer())])
+def get_movies_by_category(category: GetMovieByCategory) -> List[Movie]:
+    movies = movie_service.get_movies_by_category(category.category)
     db.close()
     if not movies:
         return JSONResponse(status_code= 404, content=["No encontrado"])
     return JSONResponse(status_code=200, content=jsonable_encoder(movies))
 
 
-@movie_router.post('/movies', tags=["Movies"], response_model=dict, status_code=201, dependencies=[Depends(JWTBearer())])
+@movie_router.post('/movies/create_movie', tags=["Movies"], response_model=dict, status_code=201, dependencies=[Depends(JWTBearer())])
 def create_movie(movie: Movie) -> dict:
     movie_service.create_movie(movie)
     db.close()
@@ -50,10 +50,10 @@ def create_movie(movie: Movie) -> dict:
     return JSONResponse(status_code=201, content=response)
 
 
-@movie_router.put('/movies/{id}', tags=["Movies"], response_model=dict, status_code=200, dependencies=[Depends(JWTBearer())])
-def update_movie(id: int, movie: Movie) -> dict:
+@movie_router.post('/movies/update_movie', tags=["Movies"], response_model=dict, status_code=200, dependencies=[Depends(JWTBearer())])
+def update_movie(movie: Movie) -> dict:
 
-    result = movie_service.update_movie(id, movie)
+    result = movie_service.update_movie(movie)
     if not result:
         db.close()
         return JSONResponse(status_code=404, content={"Error": "No se encontró"})
@@ -65,10 +65,10 @@ def update_movie(id: int, movie: Movie) -> dict:
     return JSONResponse(status_code=201, content=response)
 
 
-@movie_router.delete('/movies/{id}', tags=["Movies"], response_model=dict, status_code=200, dependencies=[Depends(JWTBearer())])
-def delete_movie(id: int) -> dict:
+@movie_router.post('/movies/delete_movie', tags=["Movies"], response_model=dict, status_code=200, dependencies=[Depends(JWTBearer())])
+def delete_movie(getMovie: GetMovie) -> dict:
     
-    result = movie_service.delete_movie(id)
+    result = movie_service.delete_movie(getMovie.id)
     if not result:
         db.close()
         return JSONResponse(status_code=404, content={"Error": "No se encontró"})

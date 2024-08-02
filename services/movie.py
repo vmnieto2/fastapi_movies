@@ -23,8 +23,8 @@ class MovieService():
         self.db.commit()
         return
 
-    def update_movie(self, id, movie):
-        result = self.get_movie(id)
+    def update_movie(self, movie):
+        result = self.get_movie(movie.id)
         if not result:
             return None
         result.title = movie.title
@@ -33,7 +33,7 @@ class MovieService():
         result.rating = movie.rating
         result.category = movie.category
         self.db.commit()
-        return
+        return True
     
     def delete_movie(self, id):
         result = self.db.query(MovieModel).filter(MovieModel.id == id).delete()

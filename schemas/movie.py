@@ -20,3 +20,10 @@ class Movie(BaseModel):
                 "category": "My movie category",
             }
         }
+
+
+class GetMovie(BaseModel):
+    id: int
+
+class GetMovieByCategory(BaseModel):
+    category: str
